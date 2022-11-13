@@ -1,26 +1,25 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState } from 'react';
+import MyLayout from './components/Layout';
+import { Routes, Route } from 'react-router-dom'
 import './App.css';
+import Dashboard from './pages/dashboard';
+import User from './pages/user';
+import ArticlesList from './pages/articles/list';
+import MedicineList from './pages/medicine/list';
 
-function App() {
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+    <MyLayout>
+      <Routes>
+        <Route path='dashboard' element={<Dashboard />} />
+        <Route path='user' element={<User />} />
+        <Route path='articles/List' element={<ArticlesList />} />
+        <Route path='articles/categories' element={<ArticlesList />} />
+        <Route path='medicine/List' element={<MedicineList />} />
+        <Route path='medicine/categories' element={<MedicineList />} />
+      </Routes>
+    </MyLayout>
+  )
+};
 
 export default App;
