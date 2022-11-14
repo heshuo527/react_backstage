@@ -7,7 +7,7 @@ import {
     DashboardFilled
 } from '@ant-design/icons';
 import { Breadcrumb, Dropdown, Layout, Menu, message } from 'antd';
-import React, { useState } from 'react';
+import React, { Children, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom'
 import logo from '../../img/logo.jpg'
 
@@ -27,7 +27,7 @@ const sideMenuData = [
             key: '/admin/medicine/categories'
         }, {
             label: '药品信息',
-            key: '/admin/medicine/list'
+            key: '/admin/medicine/list',
         }]
     },
     {
@@ -39,7 +39,11 @@ const sideMenuData = [
             key: '/admin/articles/categories'
         }, {
             label: '文章信息',
-            key: '/admin/articles/list'
+            key: '/admin/articles/list',
+            children: [{
+                label: '测试新增',
+                key: '/admin/medicine/list/li'
+            }],
         }]
     },
     {
@@ -66,11 +70,43 @@ const findOpenKeys = (key: string) => {
     return result
 }
 
+/**
+ * 获取当前选中的数据的所有父节点
+ * @param key 
+ * @returns 
+ */
+const findDeepPath = (key: string) => {
+    const result: any = [] // 处理完的所有menu数据成为一个一维数组
+    const findInfo = (arr: any) => {
+        arr.forEach((item: any) => {
+            const { children, ...info } = item
+            result.push(info)
+            if (children) {
+                findInfo(children) // 递归处理子节点
+            }
+        });
+    }
+    findInfo(sideMenuData)
+    // 获取到当前传递的key值过滤数据, 获取当前用来显示menu item数据
+    const tmpData = result.filter((item: any) => key.includes(item.key))
+    if (tmpData.length > 0) {
+        return [{ label: '首页', key: '/admin/dashboard' }, ...tmpData]
+    } else {
+        return []
+    }
+}
+
 const MyLayout = ({ children }: any) => {
-    const [collapsed, setCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState(false)
+    const [breadcrumbs, setBreadcrumbs] = useState<any>([])
     const navigate = useNavigate()
     const { pathname } = useLocation() // 获取local中的数据
     const tmpOpenKeys = findOpenKeys(pathname)
+
+    // 监听pathName数据的改变, 重新渲染面包屑的数据
+    useEffect(() => {
+        setBreadcrumbs(findDeepPath(pathname))
+    }, [pathname])
 
     return (
         <Layout style={{ width: '100vw', height: '100vh' }}>
@@ -95,7 +131,7 @@ const MyLayout = ({ children }: any) => {
                         className: 'trigger',
                         onClick: () => setCollapsed(!collapsed),
                     })}
-                    <span className='app-title'>好大夫平台管理系统</span>
+                    <span className='app-title'>好大夫医药平台管理系统</span>
                     <Dropdown overlay={<Menu
                         onClick={({ key }) => {
                             if (key === 'logOut') {
@@ -128,9 +164,11 @@ const MyLayout = ({ children }: any) => {
                     }}
                 >
                     <Breadcrumb>
-                        <Breadcrumb.Item>首页</Breadcrumb.Item>
-                        <Breadcrumb.Item>文章管理</Breadcrumb.Item>
-                        <Breadcrumb.Item>文章列表</Breadcrumb.Item>
+                        {
+                            breadcrumbs.map((item: any) => (
+                                <Breadcrumb.Item>{item.label}</Breadcrumb.Item>
+                            ))
+                        }
                     </Breadcrumb>
                     {children}
                 </Content>

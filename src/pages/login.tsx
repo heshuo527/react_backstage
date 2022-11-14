@@ -2,6 +2,8 @@ import React from 'react'
 import { Button, Card, Col, Form, Input, message, Row } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import logo from '../img/logo.jpg'
+import { loginAPI } from '../services/auth'
+import { setToken } from '../utils/tools'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -19,6 +21,7 @@ export default function Login() {
       >
         <img
           src={logo}
+          alt=''
           style={{
             display: 'block',
             margin: '20px auto',
@@ -34,10 +37,18 @@ export default function Login() {
               span: 4
             }
           }}
-            onFinish={(v) => {
-              console.log(v);
-              message.success('登录成功')
-              navigate('/admin/dashboard  ')
+            onFinish={async (v) => {
+              const res = await loginAPI(v)
+              console.log(res);
+              if (res.success) {
+                message.success('登录成功')
+                setToken(res.data)
+                navigate('/admin/dashboard')
+              } else {
+                message.error(res.errorMessage)
+              }
+              /* message.success('登录成功')
+              navigate('/admin/dashboard') */
             }}
           >
             <Form.Item label='用户名' name='useName' rules={[
@@ -62,8 +73,8 @@ export default function Login() {
                 type='primary'
                 style={{
                   display: 'block',
-                  width: '5vw',
-                  margin: '8px auto',
+                  width: '10vw',
+                  margin: '4px auto'
                 }}
               >登录</Button>
             </Form.Item>
